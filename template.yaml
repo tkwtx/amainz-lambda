@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Amainz Reserve Function
+
+Globals:
+  Function:
+    Timeout: 30
+    Tracing: Active
+
+Resources:
+  AmainzReserveFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: main
+      Layers:
+        - !Ref HeadlessChromiumLayer
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+
+  HeadlessChromiumLayer:
+    Type: AWS::Serverless::LayerVersion
+    name: headless-chromium
+    Properties:
+      ContentUri: layer/headless-chromium/
