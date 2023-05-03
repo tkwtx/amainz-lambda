@@ -25,7 +25,7 @@ type ReserveConfig struct {
 type JWeekday string
 
 type ReservationDetail struct {
-	TrainerName string `json:"trainer_name"`
+	TrainerName string `json:"trainerName"`
 	Hour        string `json:"hour"`
 }
 
