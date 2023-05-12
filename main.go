@@ -148,7 +148,16 @@ func todayReservation(rs map[JWeekday]*ReservationDetail) (*ReservationDetail, s
 			return fmt.Sprintf("0%d", m)
 		}
 	}
-	return rd, fmt.Sprintf("%d%s%d%s0000", adt.Year(), adaptMonth(adt.Month()), adt.Day(), rd.Hour)
+	adaptDay := func(d int) string {
+		// 1桁なら0をつける
+		switch d {
+		case 1, 2, 3, 4, 5, 6, 7, 8, 9:
+			return fmt.Sprintf("0%d", d)
+		default:
+			return fmt.Sprintf("%d", d)
+		}
+	}
+	return rd, fmt.Sprintf("%d%s%s%s0000", adt.Year(), adaptMonth(adt.Month()), adaptDay(adt.Day()), rd.Hour)
 }
 
 // screenShot デバッグ用
