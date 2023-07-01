@@ -94,8 +94,8 @@ func handler(_ context.Context, cfg ReserveConfig) error {
 		return err
 	}
 
-	rd, d := todayReservation(cfg.Reservations)
-	if err := page.Navigate(fmt.Sprintf(`https://airrsv.net/amainz-kitasenju/calendar/menuDetail/?schdlId=s00004C101&bookingDate=%s`, d)); err != nil {
+	rd, sd, ed := todayReservation(cfg.Reservations)
+	if err := page.Navigate(fmt.Sprintf(`https://airrsv.net/amainz-kitasenju/calendar/menuDetail/?schdlId=s00004C101&bookingDate=%s&bookingDateEnd=%s`, sd, ed)); err != nil {
 		return handleErrorWithScreenShot(page, err)
 	}
 	if err := page.FindByName("resrcSchdlItemId").Select(rd.TrainerName); err != nil {
@@ -134,7 +134,7 @@ func handler(_ context.Context, cfg ReserveConfig) error {
 	return nil
 }
 
-func todayReservation(rs map[JWeekday]*ReservationDetail) (*ReservationDetail, string) {
+func todayReservation(rs map[JWeekday]*ReservationDetail) (*ReservationDetail, string, string) {
 	_, _ = time.LoadLocation("Asia/Tokyo")
 	t := time.Now()
 	adt := t.AddDate(0, 0, 20)
@@ -157,7 +157,11 @@ func todayReservation(rs map[JWeekday]*ReservationDetail) (*ReservationDetail, s
 			return fmt.Sprintf("%d", d)
 		}
 	}
-	return rd, fmt.Sprintf("%d%s%s%s0000", adt.Year(), adaptMonth(adt.Month()), adaptDay(adt.Day()), rd.Hour)
+	// 開始時間
+	sd := fmt.Sprintf("%d%s%s%s0000", adt.Year(), adaptMonth(adt.Month()), adaptDay(adt.Day()), rd.Hour)
+	// 終了時間
+	ed := fmt.Sprintf("%d%s%s%s5000", adt.Year(), adaptMonth(adt.Month()), adaptDay(adt.Day()), rd.Hour)
+	return rd, sd, ed
 }
 
 // screenShot デバッグ用
