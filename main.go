@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/pkg/errors"
 	_ "github.com/pkg/errors"
 	"github.com/sclevine/agouti"
 )
@@ -134,6 +135,7 @@ func handler(_ context.Context, cfg ReserveConfig) error {
 	return nil
 }
 
+// https://airrsv.net/amainz-kitasenju/calendar/menuDetail/?schdlId=s00004C101&bookingDate=202301004140000&bookingDateEnd=202301004145000
 func todayReservation(rs map[JWeekday]*ReservationDetail) (*ReservationDetail, string, string) {
 	_, _ = time.LoadLocation("Asia/Tokyo")
 	t := time.Now()
@@ -142,7 +144,7 @@ func todayReservation(rs map[JWeekday]*ReservationDetail) (*ReservationDetail, s
 	adaptMonth := func(m time.Month) string {
 		// 1月なら01に戻す
 		switch m {
-		case time.November, time.December:
+		case time.October, time.November, time.December:
 			return fmt.Sprintf("%d", m)
 		default:
 			return fmt.Sprintf("0%d", m)
@@ -164,12 +166,12 @@ func todayReservation(rs map[JWeekday]*ReservationDetail) (*ReservationDetail, s
 	return rd, sd, ed
 }
 
-// screenShot デバッグ用
+// handleErrorWithScreenShot URLとスクショをwrapする
 func handleErrorWithScreenShot(page *agouti.Page, err error) error {
 	page.Screenshot("/tmp/test.png")
 	buf, _ := os.ReadFile("/tmp/test.png")
-	fmt.Printf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(buf))
-	return err
+	url, _ := page.URL()
+	return errors.Wrapf(err, "url: %s, imageBase64Encoded: %s", url, fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(buf)))
 }
 
 func main() {
